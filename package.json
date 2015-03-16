@@ -1,0 +1,12 @@
+{
+  "name": "atom-resizable-panel",
+  "version": "0.0.0",
+  "main": "./lib/main",
+  "description": "Wraps arbitraries views in resizable panels",
+  "repository": "https://github.com/redefiance/atom-resizable-panel",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "atom-space-pen-views": "^2.0.0"
+  }
+}
