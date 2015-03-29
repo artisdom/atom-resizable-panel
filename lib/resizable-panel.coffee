@@ -16,9 +16,6 @@ class ResizablePanel extends View
     @minWidth = 50 if @vertical
     @minHeight = 50 if not @vertical
 
-    @maxWidth = 250 if @vertical
-    @maxHeight = 250 if not @vertical
-
     @handle.on 'mousedown', (e) => @resizeStarted(e)
 
     @css
@@ -45,11 +42,12 @@ class ResizablePanel extends View
       position: 'absolute'
       'z-index': 3
 
+    param.item = this
     @panel = switch @position
-      when 'bottom' then atom.workspace.addBottomPanel(item: this)
-      when 'top'then atom.workspace.addTopPanel(item: this)
-      when 'left'then atom.workspace.addLeftPanel(item: this)
-      when 'right'then atom.workspace.addRightPanel(item: this)
+      when 'bottom' then atom.workspace.addBottomPanel param
+      when 'top'then atom.workspace.addTopPanel param
+      when 'left'then atom.workspace.addLeftPanel param
+      when 'right'then atom.workspace.addRightPanel param
 
     # workaround for https://discuss.atom.io/t/ugly-scrollbars-bug/1027
     @css display: 'inline-block'
