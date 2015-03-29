@@ -3,59 +3,75 @@
 module.exports =
 class ResizablePanel extends View
 
-  @content: (data)->
-    @div class: 'resizable-panel tool-panel', =>
-      @div class: 'view-scroller', =>
-        @subview 'content', data
-      @div class: 'resize-handle', outlet: 'resizeHandle'
+  @content: (param)->
+    @div =>
+      @div outlet: 'scroller', =>
+        @subview 'content', param.item
+      @div outlet: 'handle'
 
-  initialize: (data)->
-    @position = 'bottom'
+  initialize: (param)->
+    @position = param.position or 'bottom'
+    @vertical = @position is 'left' or @position is 'right'
 
-    @resizeHandle.attr position: @position
+    @minWidth = 50 if @vertical
+    @minHeight = 50 if not @vertical
 
-    @on 'dblclick', '.resize-handle', => @resizeToFitContent()
-    @on 'mousedown', '.resize-handle', (e) => @resizeStarted(e)
+    @maxWidth = 250 if @vertical
+    @maxHeight = 250 if not @vertical
 
-    switch @position
-      when 'bottom'
-        @height 200
-        atom.workspace.addBottomPanel(item: this)
-      when 'top'
-        @height 200
-        atom.workspace.addTopPanel(item: this)
-      when 'left'
-        @width 200
-        atom.workspace.addLeftPanel(item: this)
-      when 'right'
-        @width 200
-        atom.workspace.addRightPanel(item: this)
+    @handle.on 'mousedown', (e) => @resizeStarted(e)
 
+    @css
+      position: 'relative'
+      overflow: 'hidden'
+      width: '100%' is not @vertical
+      height: '100%' is @vertical
+      'z-index': 2
+
+    @scroller.css
+      position: 'absolute'
+      width: '100%'
+      height: '100%'
+      overflow: 'auto'
+
+    @handle.css
+      width: if @vertical then '10px' else '100%'
+      height: if not @vertical then '10px' else '100%'
+      left: 0 if not @vertical or @position is 'right'
+      right: 0 if @position is 'left'
+      top: 0 if @vertical or @position is 'bottom'
+      bottom: 0 if @position is 'top'
+      cursor: if @vertical then 'col-resize' else 'row-resize'
+      position: 'absolute'
+      'z-index': 3
+
+    @panel = switch @position
+      when 'bottom' then atom.workspace.addBottomPanel(item: this)
+      when 'top'then atom.workspace.addTopPanel(item: this)
+      when 'left'then atom.workspace.addLeftPanel(item: this)
+      when 'right'then atom.workspace.addRightPanel(item: this)
+
+    # workaround for https://discuss.atom.io/t/ugly-scrollbars-bug/1027
+    @css display: 'inline-block'
+    setTimeout => @css display: 'block'
+
+  destroy: ->
+    @panel.destroy()
 
   resizeStarted: =>
     @focusElement = document.activeElement
-    $(document).on('mousemove', @resizeView)
+    $(document).on('mousemove', @resizeTo)
     $(document).on('mouseup', @resizeStopped)
 
   resizeStopped: =>
-    $(document).off('mousemove', @resizeView)
+    $(document).off('mousemove', @resizeTo)
     $(document).off('mouseup', @resizeStopped)
     @focusElement?.focus()
     @focusElement = null
 
-  resizeView: ({pageX, pageY, which}) =>
-    return @resizeStopped() unless which is 1
-
+  resizeTo: ({pageX, pageY}) =>
     switch @position
-      when 'bottom'
-        @height Math.min @content.height(), $(document.body).height() - pageY
-      when 'top'
-        @height Math.min @content.height(), pageY
-      when 'left'
-        @width Math.min @content.width(), pageX
-      when 'right'
-        @width Math.min @content.width(), $(document.body).width() - pageX
-
-  resizeToFitContent: ->
-    @width('100%')
-    @height(200)
+      when 'left' then @width Math.max @minWidth, pageX
+      when 'right'then @width Math.max @minWidth, $(document.body).width() - pageX
+      when 'top'   then @height Math.max @minHeight, pageY
+      when 'bottom'then @height Math.max @minHeight, $(document.body).height() - pageY
