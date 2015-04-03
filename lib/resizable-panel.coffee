@@ -21,8 +21,8 @@ class ResizablePanel extends View
     @css
       position: 'relative'
       overflow: 'hidden'
-      width: '100%' is not @vertical
-      height: '100%' is @vertical
+      width: if @vertical then param.item.width else '100%'
+      height: if not @vertical then param.item.height else '100%'
       'z-index': 2
 
     @scroller.css
