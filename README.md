@@ -9,7 +9,7 @@ This package provides a single class:
 
 ### ResizablePanel
 ```coffee
-constructor: (config)
+constructor: (config)->
 ```
 * `config`
   * `.item`: A DOM node or jQuery wrapper used as the panel content.
