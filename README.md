@@ -1,31 +1,28 @@
 # atom-resizable-panel
 
-Wraps a DOM node or jQuery element in a Panel that provides a scroll area and resize handle.
+Creates an Atom [Panel](https://atom.io/docs/api/v0.176.0/Panel) and adds a scroll area and resize handle to it, so you can show arbitrary large HTML elements within a Panel.
 
-### Usage
-
-In package.json:
-```json
-"dependencies": {
-  "atom-resizable-panel": "git://github.com/redefiance/atom-resizable-panel.git"
-}
-```
-
-In .coffee:
+This package provides a single class:
 ```coffee
-{ResizablePanel} = require 'atom-resizable-panel'
-
-content = createElement()
-
-panel = new ResizablePanel
-  item: content
-  position: 'bottom'
+{ResizablePanel} = require 'atom-tree-view'
 ```
 
-`item` must be a DOM Node or jQuery element.  
-`position` must be either `left`, `right`, `top` or `bottom`. If omitted, it defaults to `bottom`.  
-Additional options (`visible`, `priority`) will be relayed to the underlying Panel.
+### ResizablePanel
+```coffee
+constructor: (config)
+```
+* `config`
+  * `.item`: A DOM node or jQuery wrapper used as the panel content.
+  * `.position`: Must be either `'left'`, `'right'`, `'top'` or `'bottom'`.
+  * `.visible`: The initial visibility of the panel (default: true).
+  * `.priority`: Determines stacking order. Lower priority items are forced closer to the edges of the window. (default: 100)
 
-The Panel does not resize automatically when the content changes, so you need to call `height()` or
-`width()` manually. Depending on its position the property `.minWidth` or `.minHeight` will default to
-50. The resize handler can not be used to make the Panel smaller than this value.
+The Panel does not resize automatically when the content changes, so you need
+to call `height()` or `width()` manually.
+
+```
+.minWidth = 50
+.minHeight = 50
+```
+
+The resize handler can not be used to make the panel smaller than the value defined by `minWidth` or `minHeight`, depending on orientation.
